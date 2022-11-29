@@ -1,0 +1,216 @@
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+#
+# Import the CMS content for the site
+#
+$contentCatalog = trainingContentCatalog
+$contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+
+# Import config properties into impex macros
+UPDATE GenericItem[processor = de.hybris.platform.commerceservices.impex.impl.ConfigPropertyImportProcessor]; pk[unique = true]
+$jarResourceCms = $config-jarResourceCmsValue
+
+##training-fe-1
+INSERT_UPDATE PageTemplate; $contentCV[unique = true]; uid[unique = true]              ; name                              ; frontendTemplateName     ; restrictedPageTypes(code); active[default = true]
+                          ;                          ; StorefrontTrainingPageTempalate ; Storefront Training Page Template ; layout/strofronttraining ; ContentPage
+
+##training-fe-2
+UPDATE PageTemplate; $contentCV[unique = true]; uid[unique = true]              ; velocityTemplate[translator = de.hybris.platform.commerceservices.impex.impl.FileLoaderValueTranslator]
+                   ;                          ; StorefrontTrainingPageTempalate ; ; $jarResourceCms/structure-view/structure_StorefrontTrainingPageTempalate.vm
+
+##training-fe-3
+INSERT_UPDATE ContentSlotName; name[unique = true]    ; template(uid, $contentCV)[unique = true][default = 'StorefrontTrainingPageTempalate']; validComponentTypes(code)       ; compTypeGroup(code)
+                             ; SiteLogo               ;                                                                                      ;                                 ; logo
+                             ; HeaderLinks            ;                                                                                      ;                                 ; headerlinks
+                             ; SearchBox              ;                                                                                      ;                                 ; searchbox
+                             ; MiniCart               ;                                                                                      ;                                 ; minicart
+                             ; NavigationBar          ;                                                                                      ;                                 ; navigation
+                             ; Section1-TitleSection  ;                                                                                      ; CMSParagraphComponent           ; wide
+                             ; Section2-sideSection   ;                                                                                      ;                                 ; narrow
+                             ; Section2B-topSection   ;                                                                                      ;                                 ; narrow
+                             ; Section2C-mainSection  ;                                                                                      ; SimpleResponsiveBannerComponent ; narrow
+                             ; Section2D-downSection  ;                                                                                      ;                                 ; narrow
+                             ; Footer                 ;                                                                                      ;                                 ; footer
+                             ; TopHeaderSlot          ;                                                                                      ;                                 ; wide
+                             ; BottomHeaderSlot       ;                                                                                      ;                                 ; wide
+                             ; PlaceholderContentSlot ;                                                                                      ;                                 ; wide
+
+
+INSERT_UPDATE ContentSlotForTemplate; $contentCV[unique = true]; uid[unique = true]                                     ; position[unique = true]; pageTemplate(uid, $contentCV)[unique = true][default = 'StorefrontTrainingPageTempalate']; contentSlot(uid, $contentCV)[unique = true]; allowOverwrite
+                                    ;                          ; SiteLogo-StorefrontTrainingPageTempalate               ; SiteLogo               ;                                                                                          ; SiteLogoSlot                               ; true
+                                    ;                          ; Footer-StorefrontTrainingPageTempalate                 ; Footer                 ;                                                                                          ; FooterSlot                                 ; true
+                                    ;                          ; NavigationBar-StorefrontTrainingPageTempalate          ; NavigationBar          ;                                                                                          ; NavigationBarSlot                          ; true
+                                    ;                          ; MiniCart-StorefrontTrainingPageTempalate               ; MiniCart               ;                                                                                          ; MiniCartSlot                               ; true
+                                    ;                          ; HeaderLinks-StorefrontTrainingPageTempalate            ; HeaderLinks            ;                                                                                          ; HeaderLinksSlot                            ; true
+                                    ;                          ; SearchBox-StorefrontTrainingPageTempalate              ; SearchBox              ;                                                                                          ; SearchBoxSlot                              ; true
+                                    ;                          ; TopHeaderSlot-StorefrontTrainingPageTempalate          ; TopHeaderSlot          ;                                                                                          ; TopHeaderSlot                              ; true
+                                    ;                          ; BottomHeaderSlot-StorefrontTrainingPageTempalate       ; BottomHeaderSlot       ;                                                                                          ; BottomHeaderSlot                           ; true
+                                    ;                          ; PlaceholderContentSlot-StorefrontTrainingPageTempalate ; PlaceholderContentSlot ;                                                                                          ; PlaceholderContentSlot                     ; true
+
+########################
+#impex controller
+INSERT_UPDATE ContentPage; $contentCV[unique = true]; uid[unique = true]     ; name                     ; masterTemplate(uid, $contentCV) ; label; defaultPage[default = 'true']; approvalStatus(code)[default = 'approved']; homepage[default = 'false']
+                         ;                          ; storefrontTrainingPage ; Storefront Training Page ; StorefrontTrainingPageTempalate ; storefrontTrainingPage
+
+######################
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# ImpEx for Importing CMS Content
+# Macros / Replacement Parameter definitions
+$contentCatalog = trainingContentCatalog
+$contentCatalogName = Training Content Catalog
+$productCatalog = trainingProductCatalog
+$productCatalogName = Training Product Catalog
+
+$contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$productCV = catalogVersion(catalog(id[default=$productCatalog]), version[default='Staged'])[unique=true, default=$productCatalog:Staged]
+
+$medias = medias(code, $contentCV);
+$mediaContainer = media(qualifier, $contentCV);
+$contentPage = contentPage(uid, $contentCV);
+$product = product(code, $productCV)
+$category = category(code, $productCV)
+$siteResource = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/contentCatalogs/$contentCatalog
+$productResource = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/productCatalogs/$productCatalog
+$jarResourceCms = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/cockpits/cmscockpit
+
+INSERT_UPDATE SearchBoxComponent; $contentCV[unique = true]; uid[unique = true]; name; &componentRef
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]; cmsComponents(&componentRef)
+
+INSERT_UPDATE FooterComponent; $contentCV[unique = true]; uid[unique = true]; wrapAfter; showLanguageCurrency
+
+
+## training
+INSERT_UPDATE CMSParagraphComponent; $contentCV[unique = true]; uid[unique = true]                ; name                                 ; &componentRef
+                                   ;                          ; StorefrontParagraphTitleComponent ; Storefront Paragraph Title Component ; StorefrontParagraphTitleComponent
+
+INSERT_UPDATE SimpleResponsiveBannerComponent; $contentCV[unique = true]; uid[unique = true]      ; name                      ; urlLink          ; &componentRef
+                                             ;                          ; TrainingBannerComponent ; Training Banner Component ; /Bed/Sofa/c/SOFA ; TrainingBannerComponent
+
+# Create ContentSlots
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                  ; name                                     ; cmsComponents(&componentRef)      ; active[default = true]
+                         ;                          ; Section1-StorefrontTrainingPageSlot ; Section1-StorefrontTrainingPageTempalate ; StorefrontParagraphTitleComponent ; true
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]                  ; name                            ; cmsComponents(&componentRef); active[default = true]
+                         ;                          ; Section2-StorefrontTrainingPageSlot ; Section2-StorefrontTrainingPage ; TrainingBannerComponent     ; true
+#                         ;                          ; Section2B-StorefrontTrainingPage ; section2B-StorefrontTrainingPage          ;                             ; true
+#                         ;                          ; Section2C-StorefrontTrainingPage ; Section2C-StorefrontTrainingPage          ;                             ; true
+#                         ;                          ; Section2D-StorefrontTrainingPage ; Section2D-StorefrontTrainingPage          ;                             ; true
+
+INSERT_UPDATE ContentSlotForPage; $contentCV[unique = true]; uid[unique = true]; position[unique = true]; page(uid, $contentCV)[unique = true][default = 'storefrontTrainingPage']; contentSlot(uid, $contentCV)[unique = true]; ; ;
+                                ;                          ; Section1-title    ; Section1               ;                                                                         ; Section1-StorefrontTrainingPageSlot        ; ; ;
+                                ;                          ; Section2-banner   ; Section2               ;                                                                         ; Section2-StorefrontTrainingPageSlot        ; ; ;
+
+
+#################################################
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# ImpEx for Importing CMS Content
+# Macros / Replacement Parameter definitions
+$contentCatalog = trainingContentCatalog
+$contentCatalogName = Training Content Catalog
+$productCatalog = trainingProductCatalog
+$productCatalogName = Training Product Catalog
+
+$contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$productCV = catalogVersion(catalog(id[default=$productCatalog]), version[default='Staged'])[unique=true, default=$productCatalog:Staged]
+
+$medias = medias(code, $contentCV);
+$mediaContainer = media(qualifier, $contentCV);
+$contentPage = contentPage(uid, $contentCV);
+$product = product(code, $productCV)
+$category = category(code, $productCV)
+$siteResource = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/contentCatalogs/$contentCatalog
+$productResource = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/productCatalogs/$productCatalog
+$jarResourceCms = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/cockpits/cmscockpit
+$lang = en
+
+INSERT_UPDATE SearchBoxComponent; $contentCV[unique = true]; uid[unique = true]; name; &componentRef
+
+INSERT_UPDATE ContentSlot; $contentCV[unique = true]; uid[unique = true]; cmsComponents(&componentRef)
+
+INSERT_UPDATE FooterComponent; $contentCV[unique = true]; uid[unique = true]; wrapAfter; showLanguageCurrency
+
+
+## training
+INSERT_UPDATE CMSParagraphComponent; $contentCV[unique = true]; uid[unique = true]                ; content[lang = $lang]
+                                   ;                          ; StorefrontParagraphTitleComponent ; "THIS TITLE PAGE STOREFRONT TRAINING"
+
+
+INSERT_UPDATE Media; mediaFormat(qualifier); $contentCV[unique = true]; code[unique = true]      ; @media[translator = de.hybris.platform.impex.jalo.media.MediaDataTranslator][forceWrite = true]; mime[default = 'image/jpeg']; realfilename             ; folder(qualifier)[default = 'images'];
+                   ; widescreen            ;                          ; banner-demo-1400x440.jpg ; $siteResource/images/banners/homepage/responsive/banner-demo-1400x440.jpg                      ;                             ; banner-demo-1400x440.jpg ;                                      ;
+
+
+INSERT_UPDATE MediaContainer; qualifier[unique = true]  ; $medias; $contentCV[unique = true]
+                            ; demo-homepage-discount-in ; discount-banner-1400.png,discount-banner-960.png,discount-banner-770.png,discount-banner-480.png
+
+UPDATE SimpleResponsiveBannerComponent; $contentCV[unique = true]; uid[unique = true]      ; $mediaContainer
+                                      ;                          ; TrainingBannerComponent ; demo-homepage-discount-in
+
+##########################################################
+# Macros / Replacement Parameter definitions
+$contentCatalog=trainingContentCatalog
+$contentCatalogName=Training Content Catalog
+$productCatalog=trainingProductCatalog
+$productCatalogName=Training Product Catalog
+
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$productCV=catalogVersion(catalog(id[default=$productCatalog]),version[default='Staged'])[unique=true,default=$productCatalog:Staged]
+
+$medias=medias(code, $contentCV);
+$mediaContainer=media(qualifier, $contentCV);
+$contentPage=contentPage(uid, $contentCV);
+$product=product(code, $productCV)
+$category=category(code, $productCV)
+$siteResource=jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/contentCatalogs/$contentCatalog
+$productResource=jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/productCatalogs/$productCatalog
+$jarResourceCms=jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/cockpits/cmscockpit
+
+# CMS Link Components
+INSERT_UPDATE CMSLinkComponent;$contentCV[unique=true];uid[unique=true];name;url;&linkRef;&componentRef;target(code)[default='sameWindow'];$category;$product;
+#training-page-link
+                              ;;TrainingPageLink;Training Page Link;/storefrontTrainingPage;TrainingPageLink;TrainingPageLink;;;;
+
+## entries of the above navigation nodes ##
+INSERT_UPDATE CMSNavigationEntry;uid[unique=true];$contentCV[unique=true];name;navigationNode(&nodeRef);item(CMSLinkComponent.uid,CMSLinkComponent.$contentCV);
+#training-entry
+                                ;TrainingNavNodeEntry;;Training Node Entry;TrainingNavNode;TrainingPageLink;
+
+## level 3. children of Category Nav ##
+INSERT_UPDATE CMSNavigationNode;uid[unique=true];$contentCV[unique=true];name;&nodeRef;parent(uid,$contentCV);children(uid,$contentCV);links(&linkRef);
+#training-page
+                               ;TrainingNavNode;; Training Nav Node;TrainingNavNode;DemoNavNode;
+
+
+######################################
+$contentCatalog = trainingContentCatalog
+$contentCatalogName = Training Content Catalog
+$productCatalog = trainingProductCatalog
+$productCatalogName = Training Product Catalog
+
+$contentCV = catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]), CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$productCV = catalogVersion(catalog(id[default=$productCatalog]), version[default='Staged'])[unique=true, default=$productCatalog:Staged]
+
+$medias = medias(code, $contentCV);
+$mediaContainer = media(qualifier, $contentCV);
+$contentPage = contentPage(uid, $contentCV);
+$product = product(code, $productCV)
+$category = category(code, $productCV)
+$siteResource = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/contentCatalogs/$contentCatalog
+$productResource = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/productCatalogs/$productCatalog
+$jarResourceCms = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/cockpits/cmscockpit
+$lang = en
+
+# CMS Link Components
+INSERT_UPDATE CMSLinkComponent;$contentCV[unique=true];uid[unique=true];linkName[lang=$lang]
+#training-page-link
+                              ;;TrainingPageLink;"Training Page"
+
+## level 3. children of Category Nav ##
+INSERT_UPDATE CMSNavigationNode;uid[unique=true];title[lang=$lang]
+#training-page
+                               ;TrainingNavNode;"Training Nav Node"

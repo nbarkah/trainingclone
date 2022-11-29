@@ -1,0 +1,9 @@
+data/**
+dataOri/**
+configOri/**
+log/**
+temp/**
+roles/**
+bin/modules/**
+bin/platform/**
+*.class/

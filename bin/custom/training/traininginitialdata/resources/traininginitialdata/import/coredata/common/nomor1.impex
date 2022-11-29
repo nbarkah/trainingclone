@@ -1,0 +1,54 @@
+UPDATE GenericItem[processor = de.hybris.platform.commerceservices.impex.impl.ConfigPropertyImportProcessor]; pk[unique = true]
+
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# ImPex for Importing Product Media
+
+# Macros / Replacement Parameter definitions
+$productCatalog = trainingProductCatalog
+
+$catalogVersion = catalogversion(catalog(id[default=$productCatalog]), version[default='Staged'])[unique=true, default=$productCatalog]
+$media = @media[translator=de.hybris.platform.impex.jalo.media.MediaDataTranslator]
+$thumbnail = thumbnail(code, $catalogVersion)
+$picture = picture(code, $catalogVersion)
+$thumbnails = thumbnails(code, $catalogVersion)
+$detail = detail(code, $catalogVersion)
+$normal = normal(code, $catalogVersion)
+$others = others(code, $catalogVersion)
+$data_sheet = data_sheet(code, $catalogVersion)
+$medias = medias(code, $catalogVersion)
+$galleryImages = galleryImages(qualifier, $catalogVersion)
+$siteResource = jar:org.training.initialdata.setup.InitialDataSystemSetup&/traininginitialdata/import/sampledata/productCatalogs/$productCatalog
+
+# Media formats
+INSERT_UPDATE MediaFormat;qualifier[unique=true]
+                         ;1200Wx1200H
+                         ;515Wx515H
+                         ;365Wx246H
+                         ;300Wx300H
+                         ;96Wx96H
+                         ;65Wx65H
+                         ;30Wx30H
+                         ;mobile
+                         ;tablet
+                         ;desktop
+                         ;widescreen
+
+# Create Media
+INSERT_UPDATE Media; mediaFormat(qualifier); code[unique = true]         ; $media                                     ; mime[default = 'image/jpeg']; $catalogVersion; folder(qualifier)
+                   ; 1200Wx1200H           ; media-sen-picture           ; $siteResource/images/product/sen.jpg       ;                             ;                ; images ;
+                   ; 515Wx515H             ; media-sen-thumbnail         ; $siteResource/images/product/sen.jpg       ;                             ;                ; images ;
+                   ; 300Wx300H             ; media-sen-detail            ; $siteResource/images/product/sen.jpg       ;                             ;                ; images ;
+                   ; 96Wx96H               ; media-sen-other             ; $siteResource/images/product/sen.jpg       ;                             ;                ; images ;
+                   ; 65Wx65H               ; media-sen-normal            ; $siteResource/images/product/sen.jpg       ;                             ;                ; images ;
+                   ; 30Wx30H               ; media-sen-thumbnails        ; $siteResource/images/product/sen.jpg       ;                             ;                ; images ;
+
+# Create Media Containers
+INSERT_UPDATE MediaContainer; qualifier[unique = true]; $medias                                                                                                                                                                  ; $catalogVersion
+                            ; sen-medias              ; media-sen-picture,media-sen-thumbnail,media-sen-detail,media-sen-other,media-sen-normal,media-sen-thumbnails                                                             ; ;
+
+
+# Update Products with Media and Media Containers
+UPDATE Product; code[unique = true]; $picture                 ; $thumbnail                 ; $detail                 ; $others                ; $normal                 ; $thumbnails                 ; $galleryImages    ; $catalogVersion
+              ; CV-S1              ; media-sen-picture        ; media-sen-thumbnail        ; media-sen-detail        ; media-sen-other        ; media-sen-normal        ; media-sen-thumbnails        ; sen-medias        ;

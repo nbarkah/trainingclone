@@ -1,0 +1,31 @@
+UPDATE GenericItem[processor = de.hybris.platform.commerceservices.impex.impl.ConfigPropertyImportProcessor]; pk[unique = true]
+
+
+INSERT_UPDATE UserGroup; UID[unique = true]; locname[lang = en]  ; backOfficeLoginDisabled; groups(uid)
+                       ; PTeam           ; Product Team User Group ; false                  ; employeegroup,backofficeworkflowadmingroup
+
+INSERT_UPDATE Employee; UID[unique = true]; name     ; groups(uid); password; backOfficeLoginDisabled[default = false];
+                      ; prwfl_admin         ; Product Team ; PTeam    ; 123    ;                                         ;
+
+INSERT_UPDATE WorkflowTemplate; code[unique = true]   ; name[lang = id]   ; name[lang = en]         ; owner(uid); description[lang = id]; description[lang = en]; activationscript; visibleForPrincipals(uid); ; ;
+                              ; NewProductApproval ; Approval Product ; New Product Approval ; admin     ;                       ;                       ;                 ; prwfl_admin                ; ; ;
+
+INSERT_UPDATE WorkflowActionTemplate; code[unique = true]; name[lang = id]       ; name[lang = en]                  ; description[lang = id]; description[lang = en]; principalAssigned(uid); workflow(code)[unique = true]; sendEmail; emailAddress; rendererTemplate(code); actionType(code)
+                                    ; NPA_Confirm        ; Konfirmasi oleh Admin ; Confirmation by an administrator ;                       ;                       ; PTeam               ; NewProductApproval        ; false    ;             ;                       ; start
+                                    ; NPA_End            ; Selesai               ; End                              ;                       ;                       ; PTeam               ; NewProductApproval        ; false    ;             ;                       ; end
+
+INSERT_UPDATE AutomatedWorkflowActionTemplate; code[unique = true]  ; name[lang = id]   ; name[lang = en]  ; description[lang = id]; description[lang = en]; principalAssigned(uid); workflow(code)[unique = true]; sendEmail; emailAddress; rendererTemplate(code); actionType(code); jobHandler
+                                             ; NPA_Confirm_Positive ; Konfirmasi Persetujuan Produk ; Product approved ;                       ;                       ; PTeam               ; NewProductApproval        ; false    ;             ;                       ; normal          ; registrationProductApprovalActionJob
+                                             ; NPA_Confirm_Negative ; Tolak Persetujuan Produk      ; Product unapproved  ;                       ;                       ; PTeam               ; NewProductApproval        ; false    ;             ;                       ; normal          ; registrationProductRejectionActionJob
+
+INSERT_UPDATE WorkflowDecisionTemplate; code[unique = true]; name[lang = id]   ; name[lang = en]; actionTemplate(code) ; description[allownull = true]; ; ; ; ; ;
+                                      ; NPA001             ; Konfirmasi Persetujuan Produk  ; Product approved ; NPA_Confirm          ;                              ; ; ; ; ; ;
+                                      ; NPA002             ; Tolak Persetujuan Produk       ; Product unapproved ; NPA_Confirm          ;                              ; ; ; ; ; ;
+                                      ; NPA003             ; Selesai                        ; End              ; NPA_Confirm_Positive ;                              ; ; ; ; ; ;
+                                      ; NPA004             ; Selesai                        ; End              ; NPA_Confirm_Negative ;                              ; ; ; ; ; ;
+
+INSERT_UPDATE WorkflowActionTemplateLinkTemplateRelation; source(code)[unique = true]; target(code)[unique = true]; andConnectionTemplate; qualifier                                  ; ; ; ; ; ; ;
+                                                        ; NPA001                     ; NPA_Confirm_Positive       ; false                ; WorkflowActionTemplateLinkTemplateRelation ; ; ; ; ; ; ;
+                                                        ; NPA002                     ; NPA_Confirm_Negative       ; false                ; WorkflowActionTemplateLinkTemplateRelation ; ; ; ; ; ; ;
+                                                        ; NPA003                     ; NPA_End                    ; false                ; WorkflowActionTemplateLinkTemplateRelation ; ; ; ; ; ; ;
+                                                        ; NPA004                     ; NPA_End                    ; false                ; WorkflowActionTemplateLinkTemplateRelation ; ; ; ; ; ; ;

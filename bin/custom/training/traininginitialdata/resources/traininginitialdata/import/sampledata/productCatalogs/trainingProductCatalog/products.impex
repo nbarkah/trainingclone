@@ -1,0 +1,41 @@
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# ImpEx for Importing Products
+
+# Macros / Replacement Parameter definitions
+$productCatalog = trainingProductCatalog
+$productCatalogName = Training Product Catalog
+
+$catalogVersion = catalogversion(catalog(id[default=$productCatalog]), version[default='Staged'])[unique=true, default=$productCatalog:Staged]
+$supercategories = supercategories(code, $catalogVersion)
+$baseProduct = baseProduct(code, $catalogVersion)
+$approved = approvalstatus(code)[default='approved']
+
+INSERT_UPDATE Province; code[unique=true]; name
+                      ; P01 ; Jawa Barat
+                      ; P02 ; Jawa Tengah
+                      ; P03 ; Jawa Timur
+
+INSERT_UPDATE Supplier; code[unique=true]; name ; status(code); province(code)
+                      ;supplier1; Supplier KW; VERIFIED;P01
+                      ;supplier2; Supplier KW Super; VERIFIED;P02
+                      ;supplier3; Supplier Ori Grade A; NOT_VERIFIED;P03
+                      ;supplier4; Supplier Original; VERIFIED;P01
+
+# Insert Products
+INSERT_UPDATE TrainingProduct; code[unique = true]; name        ; $supercategories; varianttype(code)[default = 'TrainingVariantProduct']; $approved; unit(code)[default = pieces]; $catalogVersion
+                             ; PULLNBEAR          ; Pull & Bear ; "SHIRT"         ;                                                      ;          ;                             ;
+                             ; CONVERSE           ; Converse    ; "SHIRT"         ;                                                      ;          ;                             ;
+                             ; HURLEY             ; Hurley      ; "SHIRT"         ;                                                      ;          ;                             ;
+                             ; COLE               ; Cole        ; "TROUSER"       ;                                                      ;          ;                             ;
+
+INSERT_UPDATE TrainingVariantProduct; $baseProduct; code[unique = true]; sku   ; material; unit(code)[default = pieces]; $approved; $catalogVersion; $supercategories; description; supplier(code)
+#                                    ; PULLNBEAR   ; PB-SHIRT-1         ; PBT1  ; Cotton  ;                             ;          ;                ; "SHIRT"         ; Pull & Bear T-Shirt  ;supplier1
+#                                    ; PULLNBEAR   ; PB-SHIRT-2         ; PBT2  ; Cotton  ;                             ;          ;                ; "SHIRT"         ; Pull & Bear T-Shirt  ;supplier2
+                                    ; CONVERSE    ; CV-S1              ; CVS1  ; Cotton  ;                             ;          ;                ; "SHIRT"         ; Converse T-Shirt     ;supplier1
+                                    ; CONVERSE    ; CV-S2              ; CVS2  ; Cotton  ;                             ;          ;                ; "SHIRT"         ; Converse T-Shirt     ;supplier2
+                                    ; HURLEY      ; HURLEY-T-1         ; HT1   ; Cotton  ;                             ;          ;                ; "SHIRT"         ; Hurley T-Shirt       ;supplier3
+                                    ; HURLEY      ; HURLEY-T-2         ; HT2   ; Cotton  ;                             ;          ;                ; "SHIRT"         ; Hurley T-Shirt       ;supplier4
+                                    ; COLE        ; COLE-C-1           ; COLC1 ; Chino   ;                             ;          ;                ; "TROUSER"       ; Cole Chino           ;supplier1
+#                                    ; COLE        ; COLE-T-1           ; COL1  ; Jeans   ;                             ;          ;                ; "TROUSER"       ; Cole Jeans           ;supplier3

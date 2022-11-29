@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# ImpEx for Importing Products
+
+# Macros / Replacement Parameter definitions
+$productCatalog = trainingProductCatalog
+$productCatalogName = Training Product Catalog
+
+$catalogVersion = catalogversion(catalog(id[default=$productCatalog]), version[default='Staged'])[unique=true, default=$productCatalog:Staged]
+$supercategories = supercategories(code, $catalogVersion)
+$baseProduct = baseProduct(code, $catalogVersion)
+$approved = approvalstatus(code)[default='approved']
+
+
+# Insert Products
+INSERT_UPDATE Car; code[unique = true]; name        ; $supercategories; hp  ; $approved; unit(code)[default = pieces]; $catalogVersion
+                 ; ERRANDCAR          ; Errand Car  ; "Staff-Pool"    ;  90 ;          ;                             ;
+                 ; TAXICAB1           ; Taxicab 1   ; "Short-Term"    ;  110;          ;                             ;
+
+INSERT_UPDATE SportsCar; code[unique = true]; name        ; $supercategories; hp ; nitroinjector; $approved; unit(code)[default = pieces]; $catalogVersion
+                       ; TAXICAB2           ; Taxicab 2   ; "Short-Term"    ; 90 ; 2            ;          ;                             ;
+
+INSERT_UPDATE Mobile; code[unique = true]; name          ; $supercategories; hp ; nitroinjector; missiles ; $approved; unit(code)[default = pieces]; $catalogVersion
+                    ; SPYSPECIAL         ; Spy-Special 2 ; "Staff-Pool"    ; 200; 4            ; 8        ;          ;                             ;

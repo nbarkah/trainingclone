@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------
+# Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+# -----------------------------------------------------------------------
+# ImpEx for Importing Categories
+
+# Macros / Replacement Parameter definitions
+$productCatalog = trainingProductCatalog
+$productCatalogName = Training Product Catalog
+
+$catalogVersion = catalogversion(catalog(id[default=$productCatalog]), version[default='Staged'])[unique=true, default=$productCatalog:Staged]
+$supercategories = source(code, $catalogVersion)[unique=true]
+$categories = target(code, $catalogVersion)[unique=true]
+
+# Insert Categories
+INSERT_UPDATE Category; code[unique = true]; $catalogVersion; supercategories(code, $catalogVersion); allowedPrincipals(uid)[default = 'customergroup']; order
+                      ; Cars-R-Us          ;                ;                                       ;                                                  ;
+                      ; Staff-Pool         ;                ; Cars-R-Us                             ;                                                  ; 1
+                      ; Rent-a-cars-R-Us   ;                ; Cars-R-Us                             ;                                                  ; 2
+                      ; Short-Term         ;                ; Rent-a-cars-R-Us                      ;                                                  ; 3
+                      ; Long-Term          ;                ; Rent-a-cars-R-Us                      ;                                                  ; 4
